@@ -13,7 +13,6 @@ class BasicAccess extends ActionFilter
     public function beforeAction($action)
     {
     	if ($this->logins) {
-	    	$logins_arr = explode("\r\n", $this->logins);
 
 	    	for (; 1; $this->authenticate()) {
 
@@ -24,7 +23,7 @@ class BasicAccess extends ActionFilter
 	    	    $user = $_SERVER['PHP_AUTH_USER'];
 	    	    $pwd = $_SERVER['PHP_AUTH_PW'];
 
-	    	    $tmp = preg_grep("/$user:.*$/", $logins_arr);
+	    	    $tmp = preg_grep("/$user:.*$/", $this->logins);
 	    	    if (!($authUserLine = array_shift($tmp))) {
 	    	        continue;
 	    	    }

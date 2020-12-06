@@ -1,6 +1,6 @@
 # Installation
 
-`composer require walkboy/yii2-basic-access`
+`composer require walkboy/yii2-basic-access:dev-master`
 
 
 # Using
