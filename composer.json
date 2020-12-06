@@ -11,5 +11,10 @@
             "name": "Vitaly Walkboy",
             "email": "info@walkboy.ru"
         }
-    ]
+    ],
+    "autoload": {
+        "psr-4": {
+            "walkboy\\BasicAccess\\": ""
+        }
+    }
 }
