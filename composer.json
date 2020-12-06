@@ -1,0 +1,15 @@
+{
+    "name": "walkboy/yii2-basic-access",
+    "description": "Base auth behavior for yii2",
+    "type": "library",
+    "require": {
+        "yiisoft/yii2": "^2.0"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Vitaly Walkboy",
+            "email": "info@walkboy.ru"
+        }
+    ]
+}
