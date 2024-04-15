@@ -23,6 +23,7 @@ class BasicAccess extends ActionFilter
 	    	    $user = $_SERVER['PHP_AUTH_USER'];
 	    	    $pwd = $_SERVER['PHP_AUTH_PW'];
 
+                $user = preg_quote($user, '/');
 	    	    $tmp = preg_grep("/$user:.*$/", $this->logins);
 	    	    if (!($authUserLine = array_shift($tmp))) {
 	    	        continue;
