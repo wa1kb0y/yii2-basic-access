@@ -2,6 +2,7 @@
 
 namespace walkboy\BasicAccess;
 
+use Yii;
 use yii\base\ActionFilter;
 
 class BasicAccess extends ActionFilter
@@ -12,48 +13,46 @@ class BasicAccess extends ActionFilter
 
     public function beforeAction($action)
     {
-    	if ($this->logins) {
+        if ($this->logins) {
+            [$user, $pwd] = Yii::$app->getRequest()->getAuthCredentials();
+            if (!static::validate((array)$this->logins, $user, $pwd)) {
+                return $this->authenticate();
+            }
+        }
 
-	    	for (; 1; $this->authenticate()) {
-
-	    	    if (!isset($_SERVER['PHP_AUTH_USER'])) {
-	    	        continue;
-	    	    }
-
-	    	    $user = $_SERVER['PHP_AUTH_USER'];
-	    	    $pwd = $_SERVER['PHP_AUTH_PW'];
-
-                $user = preg_quote($user, '/');
-	    	    $tmp = preg_grep("/$user:.*$/", $this->logins);
-	    	    if (!($authUserLine = array_shift($tmp))) {
-	    	        continue;
-	    	    }
-
-	    	    preg_match("/$user:((..).*)$/", $authUserLine, $matches);
-	    	    if (empty($matches)) {
-	    	        continue;
-                }
-	    	    $pwd_stored = $matches[1];
-	    	    
-	    	    if ($pwd != $pwd_stored) {
-	    	        continue;
-	    	    }
-
-	    	    break;
-	    	}
-	    }
-        
-		//throw new UnauthorizedHttpException('Unauthorized.');
-		   
         return parent::beforeAction($action);
     }
 
-    public function authenticate()
+    /**
+     * Checks credentials against "user:password" lines: exact user name match, constant-time comparison,
+     * lines with an empty password never match.
+     */
+    public static function validate(array $logins, ?string $user, ?string $pwd): bool
     {
-	    header('WWW-Authenticate: Basic realm="'.$this->realm.'"');
-	    header('HTTP/1.0 401 Unauthorized');
-	    echo $this->msg_unauthorized;
-	    exit;
-	}
+        if ($user === null || $user === '' || $pwd === null) {
+            return false;
+        }
+        foreach ($logins as $line) {
+            $parts = explode(':', (string)$line, 2);
+            if (count($parts) === 2 && $parts[1] !== ''
+                && hash_equals($parts[0], $user) && hash_equals($parts[1], $pwd)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Responds with 401 and a Basic auth challenge, the action is not run
+     */
+    public function authenticate(): bool
+    {
+        $response = Yii::$app->getResponse();
+        $response->setStatusCode(401);
+        $response->getHeaders()->set('WWW-Authenticate', 'Basic realm="' . addcslashes($this->realm, '"\\') . '"');
+        $response->content = $this->msg_unauthorized;
+
+        return false;
+    }
 
 }
